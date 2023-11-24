@@ -1,7 +1,9 @@
 version: '3'
 services:
-  arduino:
-    build: .
+  base:
+    build:
+      context: .
+      target: base
     image: yuzhong1214/arduino_ide
     container_name: arduino_ide
     stdin_open: true
@@ -23,3 +25,15 @@ services:
       - ../project:/home/user/project
     devices:
       - /dev:/dev
+  arduino-amd64:
+    extends:
+      service: base
+    build:
+      context: .
+      target: amd64
+  arduino-arm64:
+    extends:
+      service: base
+    build:
+      context: .
+      target: arm64
