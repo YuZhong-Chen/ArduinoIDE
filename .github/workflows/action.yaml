@@ -1,0 +1,39 @@
+# Reference: https://docs.github.com/en/actions/creating-actions/creating-a-docker-container-action
+
+name: "Arduino IDE"
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - .github/workflows/action.yaml
+      - docker/Dockerfile
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Docker meta
+        id: meta
+        # Ref: https://github.com/docker/metadata-action
+        uses: docker/metadata-action@v5
+        with:
+          # Link: https://hub.docker.com/r/yuzhong1214/avr-ws/tags
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/arduino_ide
+          tags: |
+            type=raw,value={{date 'YYYYMMDD'}}
+            type=raw,value=latest
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: docker
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
