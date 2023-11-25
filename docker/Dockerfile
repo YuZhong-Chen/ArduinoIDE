@@ -10,8 +10,6 @@ ARG USERNAME=user
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-ARG ARDUINO_VERSION=1.8.19
-
 ENV TERM=xterm-256color
 ENV SHELL=/bin/bash
 ENV LC_ALL=C.UTF-8
@@ -35,7 +33,11 @@ RUN apt-get update && apt-get install -y \
     wget \
     #
     # For arduino
+    unzip \
     xz-utils \
+    libgtk-3-0 \
+    libgbm-dev \
+    libsecret-1-0 \
     openjdk-19-jre \
     && rm -rf /var/lib/apt/lists/*
 
@@ -49,11 +51,12 @@ COPY .bashrc /home/$USERNAME/.bashrc
 FROM base as amd64
 
 # Install arduino
-RUN wget https://downloads.arduino.cc/arduino-$ARDUINO_VERSION-linux64.tar.xz \
-    && tar -xvf arduino-$ARDUINO_VERSION-linux64.tar.xz \
-    && rm arduino-$ARDUINO_VERSION-linux64.tar.xz \
-    && mv arduino-$ARDUINO_VERSION /opt/arduino \
-    && ln -s /opt/arduino/arduino /usr/local/bin/arduino
+ARG ARDUINO_VERSION=2.2.1
+RUN wget https://downloads.arduino.cc/arduino-ide/arduino-ide_${ARDUINO_VERSION}_Linux_64bit.zip \
+    && unzip arduino-ide_${ARDUINO_VERSION}_Linux_64bit.zip \
+    && rm arduino-ide_${ARDUINO_VERSION}_Linux_64bit.zip \
+    && mv arduino-ide_${ARDUINO_VERSION}_Linux_64bit /opt/arduino \
+    && ln -s /opt/arduino/arduino-ide /usr/local/bin/arduino
 
 # Other settings
 USER $USERNAME
@@ -66,10 +69,11 @@ CMD ["/bin/bash"]
 FROM base as arm64
 
 # Install arduino
-RUN wget https://downloads.arduino.cc/arduino-$ARDUINO_VERSION-linuxaarch64.tar.xz \
-    && tar -xvf arduino-$ARDUINO_VERSION-linuxaarch64.tar.xz \
-    && rm arduino-$ARDUINO_VERSION-linuxaarch64.tar.xz \
-    && mv arduino-$ARDUINO_VERSION /opt/arduino \
+ARG ARDUINO_VERSION=1.8.19
+RUN wget https://downloads.arduino.cc/arduino-${ARDUINO_VERSION}-linuxaarch64.tar.xz \
+    && tar -xvf arduino-${ARDUINO_VERSION}-linuxaarch64.tar.xz \
+    && rm arduino-${ARDUINO_VERSION}-linuxaarch64.tar.xz \
+    && mv arduino-${ARDUINO_VERSION} /opt/arduino \
     && ln -s /opt/arduino/arduino /usr/local/bin/arduino
 
 # Other settings
